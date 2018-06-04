@@ -1,0 +1,61 @@
+import java.awt.*;
+import java.awt.event.*;
+
+public class Block
+{
+    private Rectangle rect;
+    private int length;
+    private int height;
+    private int points;
+
+    public Block(Rectangle inRect, int inPoints)
+    {
+        setRect(inRect);
+        setPoints(inPoints);
+    }
+
+    public void setLen(int inL)
+    {
+        length = inL;
+    }
+
+    public int getLen()
+    {
+        return length;
+    }
+
+    public void setHt(int inH)
+    {
+        height = inH;
+    }
+
+    public int getHt()
+    {
+        return height;
+    }
+
+    public void setRect(Rectangle inR)
+    {
+        rect = inR;
+    }
+
+    public Rectangle getRect()
+    {
+        return rect;
+    }
+
+    public void setPoints(int inP)
+    {
+        points = inP;
+    }
+
+    public int getPoints()
+    {
+        return points;
+    }
+    
+    public boolean intersects(Block inB)
+    {
+        return getRect().intersects(inB.getRect());
+    }
+}
