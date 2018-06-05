@@ -1,0 +1,226 @@
+import java.awt.*;
+import java.applet.Applet;
+import java.awt.event.*;
+import java.util.Random;
+import java.util.ArrayList;
+
+public class Final extends Applet implements Runnable, MouseListener, MouseMotionListener
+{
+    Thread main = new Thread(this);
+    int bodySize = 20;
+    int bodyParts = 20;
+    int x[] = new int[1000];
+    int y[] = new int[1000];
+    int blockx[] = new int[5];
+    int blocky[] = new int[5];
+    int addsx[] = new int[2];
+    int addsy[] = new int[2];
+    boolean alive = true;
+    boolean broken = false;
+    Image buffer;
+    Graphics bufferg;
+    int score = 0;
+    Color[] colors = new Color[] {Color.cyan,Color.green,Color.yellow,Color.orange,Color.red,Color.magenta};
+    Font blockValues = new Font("bold",1,40);
+    Font addValues = new Font("bold",1,25);
+    int[] addNums = new int[2];
+    int mousex;
+    Block[] blocks = new Block[5];
+
+    public void init()
+    {
+        resize(700,640);
+        addMouseListener(this);
+        addMouseMotionListener(this);
+
+        for(int n = 0; n < 200; n++)
+        {
+            x[n] = 200;
+            y[n] = 399 + (20*n);
+        }
+        for(int p = 0; p < 5; p++)
+        {
+            blockx[p] = 0 + (80*p);
+            blocky[p] = -80;
+        }
+        for(int n = 0; n < 5; n++)
+            blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),(int)(Math.random()*(bodyParts+20)));
+        blocks[(int)(Math.random()*blocks.length)].setPoints(((int)(Math.random()*20)));
+        for(int n = 0; n < 2; n++)
+        {
+            addsx[n] = -30;
+            addsy[n] = 0;
+            addNums[n] = (int)(Math.random()*5 + 1);
+        }
+        buffer = createImage(this.getWidth(), this.getHeight());
+        bufferg = buffer.getGraphics();
+        main.start();
+    }
+
+    public boolean collides(Rectangle a, Block[] b)
+    {
+        boolean hit = false;
+        for(int n = 0; n < 5; n++)
+            if(a.intersects(b[n].getRect()) && blocks[n].getPoints() > 0)
+                hit = true;
+        return hit;
+    }
+
+    public void move()
+    {
+        for(int z = bodyParts - 1; z > 0; z--)
+        {
+            if(x[z-1] < x[z] && !(collides(new Rectangle(x[z]-5,y[z],20,20),blocks)))
+                x[z] = x[z-1];
+            if(x[z-1] > x[z] && !(collides(new Rectangle(x[z]+5,y[z],20,20),blocks)))
+                x[z] = x[z-1];
+        }
+    }
+
+    public void run()
+    {
+        while(alive)
+        {
+            try{main.sleep(40);} catch(Exception e) {}
+
+            broken = false;
+            ArrayList<Rectangle> snake = new ArrayList<Rectangle>();
+            Rectangle head = new Rectangle(x[0],y[0],bodySize,bodySize);
+            Rectangle[] additions = new Rectangle[2];
+
+            for(int n = 1; n < bodyParts; n++)
+                snake.add(new Rectangle(x[n],y[n],bodySize,bodySize));
+            for(int n = 0; n < 5; n++)
+                blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),blocks[n].getPoints());
+            if(blocky[0] == 220)
+                for(int n = 0; n < 2; n++)
+                {
+                    addsx[n] = (int)(Math.random()*380);
+                    addsy[n] = (int)(Math.random()*-280 - 40);
+                }
+            for(int n = 0; n < 2; n++)
+                additions[n] = new Rectangle(addsx[n],addsy[n],20,20);
+            if(blocky[0] > 640)
+            {
+                for(int n = 0; n < blocks.length; n++)
+                {
+                    blocky[n] = -80;
+                    blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),(int)(Math.random()*(bodyParts+20)));
+                }
+                blocks[(int)(Math.random()*blocks.length)].setPoints(((int)(Math.random()*20)));
+            }
+            move();
+            for(int p = 0; p < 5 && !broken; p++)
+            {
+                int old = blocks[p].getPoints();
+                if(y[0] == blocky[0] + 80 && x[0] >= blockx[p] && x[0] <= blockx[p] + 80 && blocks[p].getPoints() > 0)
+                {
+                    blocks[p].setPoints(blocks[p].getPoints()-1);
+                    bodyParts--;
+                    score++;
+                }
+                if((blocks[p].getPoints() == 0 && old != 0) || (x[0] >= blockx[p] && x[0] <= blockx[p] + 80 && blocks[p].getPoints() == 0))
+                {
+                    broken = true;
+                }
+            }
+            if(y[0] != blocky[0] + 80 || broken)
+            {
+                for(int n = 0; n < 5; n++)
+                    blocky[n] += 3;
+                for(int n = 0; n < 2; n ++)
+                    addsy[n] += 3;
+            }
+            for(int n = 0; n < 2; n++)
+            {
+                if(head.intersects(additions[n]))
+                {
+                    bodyParts += addNums[n];
+                    addsx[n] = -30;
+                    addsy[n] = 0;
+                    addNums[n] = (int)(Math.random()*5 + 1);
+                }
+            }
+            if(bodyParts == 0)
+                alive = false;
+            repaint();
+        }
+    }
+
+    public void mouseClicked(MouseEvent e){}
+
+    public void mousePressed(MouseEvent e){}
+
+    public void mouseReleased(MouseEvent e){}
+
+    public void mouseEntered(MouseEvent e){}
+
+    public void mouseExited(MouseEvent e){}
+
+    public void mouseDragged(MouseEvent e){}
+
+    public void mouseMoved(MouseEvent e)
+    {
+        if(e.getX() < 380 && !collides(new Rectangle(e.getX(),y[0],20,20),blocks))
+            mousex = e.getX();
+        x[0] = mousex;
+        repaint();
+    }
+
+    public void paint(Graphics g)
+    {
+        bufferg.setColor(Color.black);
+        bufferg.fillRect(0,0,400,640);
+        bufferg.setColor(Color.darkGray);
+        bufferg.fillRect(400,0,300,640);
+        bufferg.setColor(Color.red);
+        bufferg.setFont(blockValues);
+        bufferg.drawString("Score: " + score,450,100);
+        bufferg.drawString("Parts: " + bodyParts,450,160);
+        bufferg.drawString("mousex: " + mousex,450,220);
+        bufferg.setFont(addValues);
+        for(int n = 0; n < 2; n++)
+        {
+            if(addsy[n] <= 640)
+            {
+                bufferg.setColor(Color.yellow);
+                bufferg.fillOval(addsx[n],addsy[n],bodySize,bodySize);
+                bufferg.setColor(Color.white);
+                bufferg.drawString(addNums[n] + "", addsx[n],addsy[n] - 20);
+            }
+        }
+        bufferg.setColor(Color.yellow);
+        for(int n = 0; n < bodyParts; n++)
+            bufferg.fillOval(x[n],y[n],bodySize,bodySize);
+        bufferg.setFont(blockValues);
+        for(int p = 0; p < 5; p++)
+        {
+            int c = 0;
+            if(blocks[p].getPoints() > 10)
+                c++;
+            if(blocks[p].getPoints() > 20)
+                c++;
+            if(blocks[p].getPoints() > 30)
+                c++;
+            if(blocks[p].getPoints() > 40)
+                c++;
+            if(blocks[p].getPoints() > 50)
+                c++;
+            bufferg.setColor(colors[c]);
+            if(blocks[p].getPoints() > 0)
+            {
+                bufferg.fillRect(blockx[p],blocky[p],80,80);
+                bufferg.setColor(Color.black);
+                bufferg.drawString(blocks[p].getPoints() + "",blockx[p] + 20,blocky[p] + 50);
+            }
+        }
+
+        g.drawImage(buffer,0,0,this);
+    }
+
+    public void update(Graphics g)
+    {
+        paint(g);
+    }
+}
+
