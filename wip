@@ -8,7 +8,7 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
 {
     Thread main = new Thread(this);
     int bodySize = 20;
-    int bodyParts = 20;
+    int bodyParts = 30;
     int x[] = new int[1000];
     int y[] = new int[1000];
     int blockx[] = new int[5];
@@ -25,6 +25,7 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
     Font addValues = new Font("bold",1,25);
     int[] addNums = new int[2];
     int mousex;
+    int speed = 4;
     Block[] blocks = new Block[5];
 
     public void init()
@@ -36,7 +37,7 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
         for(int n = 0; n < 200; n++)
         {
             x[n] = 200;
-            y[n] = 399 + (20*n);
+            y[n] = 400 + (20*n);
         }
         for(int p = 0; p < 5; p++)
         {
@@ -61,7 +62,7 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
     {
         boolean hit = false;
         for(int n = 0; n < 5; n++)
-            if(a.intersects(b[n].getRect()) && blocks[n].getPoints() > 0)
+            if(a.intersects(b[n].getRect()) && b[n].getPoints() > 0)
                 hit = true;
         return hit;
     }
@@ -70,10 +71,12 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
     {
         for(int z = bodyParts - 1; z > 0; z--)
         {
+            if(Math.abs(x[z]-x[z-1]) == 1)
+                x[z] = x[z-1];
             if(x[z-1] < x[z] && !(collides(new Rectangle(x[z]-5,y[z],20,20),blocks)))
-                x[z] = x[z-1];
+                x[z] -= (int)((x[z]-x[z-1])/1.5);
             if(x[z-1] > x[z] && !(collides(new Rectangle(x[z]+5,y[z],20,20),blocks)))
-                x[z] = x[z-1];
+                x[z] += (int)((x[z-1]-x[z])/1.5);
         }
     }
 
@@ -81,7 +84,7 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
     {
         while(alive)
         {
-            try{main.sleep(40);} catch(Exception e) {}
+            try{main.sleep(35);} catch(Exception e) {}
 
             broken = false;
             ArrayList<Rectangle> snake = new ArrayList<Rectangle>();
@@ -92,11 +95,12 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
                 snake.add(new Rectangle(x[n],y[n],bodySize,bodySize));
             for(int n = 0; n < 5; n++)
                 blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),blocks[n].getPoints());
-            if(blocky[0] == 220)
+            if(blocky[0] == 208)
                 for(int n = 0; n < 2; n++)
-                {
+                {       
                     addsx[n] = (int)(Math.random()*380);
                     addsy[n] = (int)(Math.random()*-280 - 40);
+                    addsy[n] = addsy[n] - (addsy[n] % speed);
                 }
             for(int n = 0; n < 2; n++)
                 additions[n] = new Rectangle(addsx[n],addsy[n],20,20);
@@ -118,6 +122,8 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
                     blocks[p].setPoints(blocks[p].getPoints()-1);
                     bodyParts--;
                     score++;
+                    if(score % 50 == 0 && speed < 16)
+                        speed *= 2;
                 }
                 if((blocks[p].getPoints() == 0 && old != 0) || (x[0] >= blockx[p] && x[0] <= blockx[p] + 80 && blocks[p].getPoints() == 0))
                 {
@@ -127,9 +133,9 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
             if(y[0] != blocky[0] + 80 || broken)
             {
                 for(int n = 0; n < 5; n++)
-                    blocky[n] += 3;
+                    blocky[n] += speed;
                 for(int n = 0; n < 2; n ++)
-                    addsy[n] += 3;
+                    addsy[n] += speed;
             }
             for(int n = 0; n < 2; n++)
             {
@@ -177,17 +183,18 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
         bufferg.setFont(blockValues);
         bufferg.drawString("Score: " + score,450,100);
         bufferg.drawString("Parts: " + bodyParts,450,160);
-        bufferg.drawString("mousex: " + mousex,450,220);
+        bufferg.drawString("addsy: " + addsy[0],450,220);
+        bufferg.drawString("speed: " + speed, 450,280);
         bufferg.setFont(addValues);
         for(int n = 0; n < 2; n++)
         {
-            if(addsy[n] <= 640)
-            {
+            //if(addsy[n] <= 640)
+            //{
                 bufferg.setColor(Color.yellow);
                 bufferg.fillOval(addsx[n],addsy[n],bodySize,bodySize);
                 bufferg.setColor(Color.white);
                 bufferg.drawString(addNums[n] + "", addsx[n],addsy[n] - 20);
-            }
+            //}
         }
         bufferg.setColor(Color.yellow);
         for(int n = 0; n < bodyParts; n++)
