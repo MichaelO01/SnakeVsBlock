@@ -1,10 +1,11 @@
+package MP3;
 import java.awt.*;
 import java.applet.Applet;
 import java.awt.event.*;
 import java.util.Random;
 import java.util.ArrayList;
 
-public class Final extends Applet implements Runnable, MouseListener, MouseMotionListener
+public class Final extends Applet implements Runnable, MouseListener, MouseMotionListener, KeyListener
 {
     Thread main = new Thread(this);
     int bodySize = 20;
@@ -15,7 +16,7 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
     int blocky[] = new int[5];
     int addsx[] = new int[2];
     int addsy[] = new int[2];
-    boolean alive = true;
+    boolean alive = false;
     boolean broken = false;
     Image buffer;
     Graphics bufferg;
@@ -33,10 +34,11 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
         resize(700,640);
         addMouseListener(this);
         addMouseMotionListener(this);
+        addKeyListener(this);
 
         for(int n = 0; n < 200; n++)
         {
-            x[n] = 200;
+            x[n] = 190;
             y[n] = 400 + (20*n);
         }
         for(int p = 0; p < 5; p++)
@@ -82,76 +84,92 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
 
     public void run()
     {
-        while(alive)
+        while(true)
         {
             try{main.sleep(35);} catch(Exception e) {}
 
-            broken = false;
-            ArrayList<Rectangle> snake = new ArrayList<Rectangle>();
-            Rectangle head = new Rectangle(x[0],y[0],bodySize,bodySize);
-            Rectangle[] additions = new Rectangle[2];
+            if(alive)
+            {
+                broken = false;
+                ArrayList<Rectangle> snake = new ArrayList<Rectangle>();
+                Rectangle head = new Rectangle(x[0],y[0],bodySize,bodySize);
+                Rectangle[] additions = new Rectangle[2];
 
-            for(int n = 1; n < bodyParts; n++)
-                snake.add(new Rectangle(x[n],y[n],bodySize,bodySize));
-            for(int n = 0; n < 5; n++)
-                blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),blocks[n].getPoints());
-            if(blocky[0] == 208)
-                for(int n = 0; n < 2; n++)
-                {       
-                    addsx[n] = (int)(Math.random()*380);
-                    addsy[n] = (int)(Math.random()*-280 - 40);
-                    addsy[n] = addsy[n] - (addsy[n] % speed);
-                }
-            for(int n = 0; n < 2; n++)
-                additions[n] = new Rectangle(addsx[n],addsy[n],20,20);
-            if(blocky[0] > 640)
-            {
-                for(int n = 0; n < blocks.length; n++)
-                {
-                    blocky[n] = -80;
-                    blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),(int)(Math.random()*(bodyParts+20)));
-                }
-                blocks[(int)(Math.random()*blocks.length)].setPoints(((int)(Math.random()*20)));
-            }
-            move();
-            for(int p = 0; p < 5 && !broken; p++)
-            {
-                int old = blocks[p].getPoints();
-                if(y[0] == blocky[0] + 80 && x[0] >= blockx[p] && x[0] <= blockx[p] + 80 && blocks[p].getPoints() > 0)
-                {
-                    blocks[p].setPoints(blocks[p].getPoints()-1);
-                    bodyParts--;
-                    score++;
-                    if(score % 50 == 0 && speed < 16)
-                        speed *= 2;
-                }
-                if((blocks[p].getPoints() == 0 && old != 0) || (x[0] >= blockx[p] && x[0] <= blockx[p] + 80 && blocks[p].getPoints() == 0))
-                {
-                    broken = true;
-                }
-            }
-            if(y[0] != blocky[0] + 80 || broken)
-            {
+                for(int n = 1; n < bodyParts; n++)
+                    snake.add(new Rectangle(x[n],y[n],bodySize,bodySize));
                 for(int n = 0; n < 5; n++)
-                    blocky[n] += speed;
-                for(int n = 0; n < 2; n ++)
-                    addsy[n] += speed;
-            }
-            for(int n = 0; n < 2; n++)
-            {
-                if(head.intersects(additions[n]))
+                    blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),blocks[n].getPoints());
+                if(blocky[0] == 208)
+                    for(int n = 0; n < 2; n++)
+                    {       
+                        addsx[n] = (int)(Math.random()*380);
+                        addsy[n] = (int)(Math.random()*-280 - 40);
+                        addsy[n] = addsy[n] - (addsy[n] % speed);
+                    }
+                for(int n = 0; n < 2; n++)
+                    additions[n] = new Rectangle(addsx[n],addsy[n],20,20);
+                if(blocky[0] > 640)
                 {
-                    bodyParts += addNums[n];
-                    addsx[n] = -30;
-                    addsy[n] = 0;
-                    addNums[n] = (int)(Math.random()*5 + 1);
+                    for(int n = 0; n < blocks.length; n++)
+                    {
+                        blocky[n] = -80;
+                        blocks[n] = new Block(new Rectangle(blockx[n],blocky[n],80,80),(int)(Math.random()*(bodyParts+20)));
+                    }
+                    blocks[(int)(Math.random()*blocks.length)].setPoints(((int)(Math.random()*20)));
                 }
+                move();
+                for(int p = 0; p < 5 && !broken; p++)
+                {
+                    int old = blocks[p].getPoints();
+                    if(y[0] == blocky[0] + 80 && x[0] >= blockx[p] && x[0] <= blockx[p] + 80 && blocks[p].getPoints() > 0)
+                    {
+                        blocks[p].setPoints(blocks[p].getPoints()-1);
+                        bodyParts--;
+                        score++;
+                        if(score % 50 == 0 && speed < 16)
+                            speed *= 2;
+                    }
+                    if((blocks[p].getPoints() == 0 && old != 0) || (x[0] >= blockx[p] && x[0] <= blockx[p] + 80 && blocks[p].getPoints() == 0))
+                    {
+                        broken = true;
+                    }
+                }
+                if(y[0] != blocky[0] + 80 || broken)
+                {
+                    for(int n = 0; n < 5; n++)
+                        blocky[n] += speed;
+                    for(int n = 0; n < 2; n ++)
+                        addsy[n] += speed;
+                }
+                for(int n = 0; n < 2; n++)
+                {
+                    if(head.intersects(additions[n]))
+                    {
+                        bodyParts += addNums[n];
+                        addsx[n] = -30;
+                        addsy[n] = 0;
+                        addNums[n] = (int)(Math.random()*5 + 1);
+                    }
+                }
+                if(bodyParts == 0)
+                    alive = false;
+                repaint();
             }
-            if(bodyParts == 0)
-                alive = false;
-            repaint();
         }
     }
+
+    public void keyPressed(KeyEvent e)
+    {
+        int key = e.getKeyCode();
+
+        if(key == e.VK_SPACE)
+            alive = true;
+        repaint();
+    }
+
+    public void keyReleased(KeyEvent e){}
+
+    public void keyTyped(KeyEvent e){}
 
     public void mouseClicked(MouseEvent e){}
 
@@ -167,9 +185,11 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
 
     public void mouseMoved(MouseEvent e)
     {
-        if(e.getX() < 380 && !collides(new Rectangle(e.getX(),y[0],20,20),blocks))
+        if(e.getX() < 380 && !collides(new Rectangle(e.getX(),y[0],20,20),blocks) && alive)
+        {
             mousex = e.getX();
-        x[0] = mousex;
+            x[0] = mousex;
+        }
         repaint();
     }
 
@@ -190,15 +210,19 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
         {
             //if(addsy[n] <= 640)
             //{
-                bufferg.setColor(Color.yellow);
-                bufferg.fillOval(addsx[n],addsy[n],bodySize,bodySize);
-                bufferg.setColor(Color.white);
-                bufferg.drawString(addNums[n] + "", addsx[n],addsy[n] - 20);
+            bufferg.setColor(Color.yellow);
+            bufferg.fillOval(addsx[n],addsy[n],bodySize,bodySize);
+            bufferg.setColor(Color.white);
+            bufferg.drawString(addNums[n] + "", addsx[n],addsy[n] - 20);
             //}
         }
-        bufferg.setColor(Color.yellow);
         for(int n = 0; n < bodyParts; n++)
+        {
+            bufferg.setColor(Color.yellow);
             bufferg.fillOval(x[n],y[n],bodySize,bodySize);
+            bufferg.setColor(Color.black);
+            bufferg.drawOval(x[n],y[n],bodySize,bodySize);
+        }
         bufferg.setFont(blockValues);
         for(int p = 0; p < 5; p++)
         {
@@ -218,7 +242,8 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
             {
                 bufferg.fillRect(blockx[p],blocky[p],80,80);
                 bufferg.setColor(Color.black);
-                bufferg.drawString(blocks[p].getPoints() + "",blockx[p] + 20,blocky[p] + 50);
+                bufferg.drawRect(blockx[p],blocky[p],80,80);
+                blocks[p].drawCenteredString(bufferg,blocks[p].getPoints() + "", blocks[p].getRect(),blockValues);
             }
         }
 
@@ -230,4 +255,3 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
         paint(g);
     }
 }
-
