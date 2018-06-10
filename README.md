@@ -1,2 +1,2 @@
 # SnakeVsBlock
-final project ap compsci
+Final Project AP Computer Science 2018
