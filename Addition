@@ -1,0 +1,42 @@
+import java.awt.*;
+
+public class Addition
+{
+    private Rectangle rect;
+    private int points;
+
+    public Addition(Rectangle inRect, int inPoints)
+    {
+        rect = inRect;
+        setPoints(inPoints);
+    }
+
+    public void setPoints(int inP)
+    {
+        points = inP;
+    }
+
+    public int getPoints()
+    {
+        return points;
+    }
+
+    public String toString()
+    {
+        return "Points: " + getPoints() + "Position: (" + rect.x + "," + rect.y + ")";
+    }
+
+    public Rectangle getRect()
+    {
+        return rect;
+    }
+
+    public void draw(Graphics g)
+    {
+        g.setColor(Color.yellow);
+        g.setFont(new Font("bold",1,25));
+        g.fillOval(rect.x,rect.y,20,20);
+        g.setColor(Color.white);
+        g.drawString(getPoints() + "", rect.x,rect.y - 20);
+    }
+}
