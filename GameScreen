@@ -1,0 +1,55 @@
+import java.awt.*;
+
+public class GameScreen
+{
+    private Font font1,font2;
+
+    public GameScreen()
+    {
+        font1 = new Font("bold",4,60);
+        font2 = new Font("bold",1,60);
+    }
+    
+    public String toString()
+    {
+        return "Snake VS Block";
+    }
+
+    public void drawCenteredString(Graphics g, String text, Rectangle r, Font font)
+    {
+        FontMetrics metrics = g.getFontMetrics(font);
+        int x = r.x + (r.width - metrics.stringWidth(text)) / 2;
+        int y = r.y + ((r.height - metrics.getHeight()) / 2) + metrics.getAscent();
+        g.setFont(font);
+        g.drawString(text, x, y);
+    }
+
+    public void drawScreen(Graphics g)
+    {
+        g.setColor(Color.black);
+        g.fillRect(0,0,400,640);
+        g.drawRect(0,0,400,640);
+        g.setColor(Color.lightGray);
+        g.fillRect(400,0,300,640);
+        g.setColor(Color.white);
+        drawCenteredString(g,"Snake",new Rectangle(400,20,300,80),font1);
+        drawCenteredString(g,"Block",new Rectangle(400,180,300,80),font1);
+        g.setColor(Color.red);
+        drawCenteredString(g,"VS",new Rectangle(400,100,300,80),font2);
+    }
+    
+    public void drawRules(Graphics g)
+    {
+        g.setColor(Color.lightGray);
+        g.fillRect(0,0,700,640);
+        g.setColor(Color.black);
+        g.setFont(new Font("bold",1,40));
+        g.drawString("RULES:",20,60);
+        g.setFont(new Font("bold",1,20));
+        g.drawString("> Use the mouse to pilot your snake through a series of blocks.",20,120);
+        g.drawString("> Each block is numbered, showing the parts needed to break it.",20,180);
+        g.drawString("> When you hit a block, you lose parts until its value reaches zero.",20,240);
+        g.drawString("> Yellow circles add parts to your snake.",20,300);
+        g.drawString("> The game ends when you run out of parts.",20,360);
+    }
+}
