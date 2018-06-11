@@ -57,6 +57,11 @@ public class Block
     {
         return points;
     }
+    
+    public void decrease()
+    {
+        points--;
+    }
 
     public void drawCenteredString(Graphics g, String text, Rectangle r, Font font)
     {
