@@ -1,0 +1,52 @@
+import java.awt.*;
+
+public class GameButton
+{
+    private Rectangle rect;
+    private String message;
+    
+    public GameButton(Rectangle inRect, String inMsg)
+    {
+        rect = inRect;
+        setMessage(inMsg);
+    }
+    
+    public String toString()
+    {
+        return message + " Button, (" + rect.x + "," + rect.y + ")";
+    }
+    
+    public void setMessage(String inM)
+    {
+        message = inM;
+    }
+    
+    public String getMessage()
+    {
+        return message;
+    }
+    
+    public Rectangle getRect()
+    {
+        return rect;
+    }
+    
+    public void drawCenteredString(Graphics g, String text, Rectangle r, Font font)
+    {
+        FontMetrics metrics = g.getFontMetrics(font);
+        int x = r.x + (r.width - metrics.stringWidth(text)) / 2;
+        int y = r.y + ((r.height - metrics.getHeight()) / 2) + metrics.getAscent();
+        g.setFont(font);
+        g.drawString(text, x, y);
+    }
+    
+    public void draw(Graphics g, Color button, Color text, Font f)
+    {
+        g.setColor(button);
+        g.fillRect(rect.x,rect.y,rect.width,rect.height);
+        g.setColor(Color.black);
+        g.drawRect(rect.x,rect.y,rect.width,rect.height);
+        g.setColor(text);
+        drawCenteredString(g,message,rect,f);
+    }
+}
