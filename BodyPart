@@ -1,0 +1,38 @@
+import java.awt.*;
+
+public class BodyPart
+{
+    private Rectangle rect;
+
+    public BodyPart(Rectangle inRect)
+    {
+        rect = inRect;
+    }
+
+    public String toString()
+    {
+        return " Part Position: (" + rect.x + "," + rect.y + ")";
+    }
+
+    public Rectangle getRect()
+    {
+        return rect;
+    }
+
+    public boolean collides(Block [] b)
+    {
+        boolean hit = false;
+        for(int n = 0; n < b.length; n++)
+            if(getRect().intersects(b[n].getRect()) && b[n].getPoints() > 0)
+                hit = true;
+        return hit;
+    }
+
+    public void draw(Graphics g)
+    {
+        g.setColor(Color.yellow);
+        g.fillOval(rect.x,rect.y,rect.width,rect.height);
+        g.setColor(Color.black);
+        g.drawOval(rect.x,rect.y,rect.width,rect.height);
+    }
+}
