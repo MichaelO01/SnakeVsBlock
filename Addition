@@ -30,6 +30,15 @@ public class Addition
     {
         return rect;
     }
+    
+    public boolean collides(Block [] b)
+    {
+        boolean hit = false;
+        for(int n = 0; n < 5; n++)
+            if(new Rectangle(rect.x,rect.y-20,rect.width,rect.height+20).intersects(b[n].getRect()) && b[n].getPoints() > 0)
+                hit = true;
+        return hit;
+    }
 
     public void draw(Graphics g)
     {
