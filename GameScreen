@@ -3,16 +3,33 @@ import java.awt.*;
 public class GameScreen
 {
     private Font font1,font2;
+    private int score;
 
     public GameScreen()
     {
         font1 = new Font("bold",4,60);
         font2 = new Font("bold",1,60);
+        score = 0;
     }
-    
+
     public String toString()
     {
         return "Snake VS Block";
+    }
+
+    public void setScore(int inS)
+    {
+        score = inS;
+    }
+
+    public int getScore()
+    {
+        return score;
+    }
+    
+    public void increaseScore()
+    {
+        score++;
     }
 
     public void drawCenteredString(Graphics g, String text, Rectangle r, Font font)
@@ -36,8 +53,10 @@ public class GameScreen
         drawCenteredString(g,"Block",new Rectangle(400,180,300,80),font1);
         g.setColor(Color.red);
         drawCenteredString(g,"VS",new Rectangle(400,100,300,80),font2);
+        g.setFont(new Font("bold",4,40));
+        g.drawString("Score: " + score,450,300);
     }
-    
+
     public void drawRules(Graphics g)
     {
         g.setColor(Color.lightGray);
