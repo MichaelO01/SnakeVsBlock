@@ -23,6 +23,7 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
     int speed;
     GameButton play = new GameButton(new Rectangle(120,300,160,80),"PLAY");
     GameButton rules = new GameButton(new Rectangle(450,540,200,60),"RULES");
+    GameButton back = new GameButton(new Rectangle(20,540,100,60),"BACK");
     Block[] blocks = new Block[5];
     Addition[] additions = new Addition[3];
     ArrayList<BodyPart> snake = new ArrayList<BodyPart>();
@@ -189,6 +190,8 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
             if(new Rectangle(mousex,mousey,1,1).intersects(rules.getRect()))
                 rulesSheet = true;
         }
+        if(new Rectangle(mousex,mousey,1,1).intersects(back.getRect()) && rulesSheet)
+            rulesSheet = false;
         repaint();
     }
 
@@ -239,7 +242,10 @@ public class Final extends Applet implements Runnable, MouseListener, MouseMotio
             play.draw(bufferg,Color.lightGray,Color.red,new Font("bold",1,30));
         }
         if(rulesSheet)
+        {
             screen.drawRules(bufferg);
+            back.draw(bufferg,Color.darkGray,Color.black,new Font("bold",1,30));
+        }
 
         g.drawImage(buffer,0,0,this);
     }
