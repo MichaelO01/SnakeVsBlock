@@ -57,10 +57,44 @@ public class Block
     {
         return points;
     }
-    
+
     public void decrease()
     {
         points--;
+    }
+
+    public void setX(int inX)
+    {
+        rect = new Rectangle(inX,rect.y,rect.width,rect.height);
+    }
+
+    public int getX()
+    {
+        return rect.x;
+    }
+
+    public void setY(int inY)
+    {
+        rect = new Rectangle(rect.x,inY,rect.width,rect.height);
+    }
+
+    public int getY()
+    {
+        return rect.y;
+    }
+
+    public void changeY(int n)
+    {
+        setY(rect.y + n);
+    }
+
+    public boolean collides(Block [] b)
+    {
+        boolean hit = false;
+        for(int n = 0; n < b.length; n++)
+            if(getRect().intersects(b[n].getRect()) && b[n].getPoints() > 0)
+                hit = true;
+        return hit;
     }
 
     public void drawCenteredString(Graphics g, String text, Rectangle r, Font font)
