@@ -31,6 +31,11 @@ public class GameScreen
     {
         score++;
     }
+    
+    public void resetScore()
+    {
+        score = 0;
+    }
 
     public void drawCenteredString(Graphics g, String text, Rectangle r, Font font)
     {
