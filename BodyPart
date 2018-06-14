@@ -14,6 +14,11 @@ public class BodyPart
         return " Part Position: (" + rect.x + "," + rect.y + ")";
     }
 
+    public void setRect(Rectangle inR)
+    {
+        rect = inR;
+    }
+
     public Rectangle getRect()
     {
         return rect;
@@ -26,6 +31,39 @@ public class BodyPart
             if(getRect().intersects(b[n].getRect()) && b[n].getPoints() > 0)
                 hit = true;
         return hit;
+    }
+
+    public boolean hits(Block b)
+    {
+        if(getY() != b.getY() + 80 || b.getPoints() == 0)
+            return false;
+        else
+            return getX() >= b.getX() && getX() <= b.getX() + 80;
+    }
+
+    public void setX(int inX)
+    {
+        rect = new Rectangle(inX,rect.y,rect.width,rect.height);
+    }
+
+    public int getX()
+    {
+        return rect.x;
+    }
+
+    public void changeX(int n)
+    {
+        setX(rect.x + n);
+    }
+
+    public void setY(int inY)
+    {
+        rect = new Rectangle(rect.x,inY,rect.width,rect.height);
+    }
+
+    public int getY()
+    {
+        return rect.y;
     }
 
     public void draw(Graphics g)
