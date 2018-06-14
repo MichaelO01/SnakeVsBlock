@@ -1,0 +1,306 @@
+import java.awt.*;
+import java.applet.Applet;
+import java.awt.event.*;
+import java.util.Random;
+import java.util.ArrayList;
+import javax.swing.Timer;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+public class SnakeVsBlock extends Applet implements Runnable, MouseListener,MouseMotionListener
+{
+    Thread main = new Thread(this);
+    int bodyParts;
+    boolean alive = false;
+    boolean rulesSheet = false;
+    boolean collision = true;
+    Image buffer;
+    Graphics bufferg;
+    Font blockValues = new Font("bold",4,40);
+    Font buttonFont = new Font("bold",1,30);
+    int mousex;
+    int speed;
+    GameButton play = new GameButton(new Rectangle(120,300,160,80),"PLAY");
+    GameButton rules = new GameButton(new Rectangle(450,540,200,60),"RULES");
+    GameButton back = new GameButton(new Rectangle(20,540,100,60),"BACK");
+    Block[] blocks = new Block[5];
+    Addition[] additions = new Addition[3];
+    ArrayList<BodyPart> snake;
+    GameScreen screen = new GameScreen();
+    Timer stopwatch;
+    int ct = 0;
+    int delay = 1000;
+
+    public void init()
+    {
+        resize(700,640);
+        addMouseListener(this);
+        addMouseMotionListener(this);
+
+        bodyParts = 30;
+        speed = 8;
+        screen.resetScore();
+        collision = false;
+        snake = new ArrayList<BodyPart>();
+
+        for(int n = 0; n < bodyParts; n++)
+            snake.add(new BodyPart(new Rectangle(190,432 + (20*n),20,20)));
+
+        for(int n = 0; n < 5; n++)
+        {
+            blocks[n] = new Block(new Rectangle(80*n,-80,80,80),(int)(Math.random()*(bodyParts+30)));
+        }
+        blocks[(int)(Math.random()*blocks.length)].setPoints(((int)(Math.random()*20)));
+
+        for(int n = 0; n < 3; n++)
+        {
+            additions[n] = new Addition(new Rectangle((int)(Math.random()*380),(int)(Math.random()*-420 - 120),20,20),(int)(Math.random()*5 + 1));
+            additions[n].setY(additions[n].getY() - (additions[n].getY() % speed));
+        }
+        buffer = createImage(this.getWidth(), this.getHeight());
+        bufferg = buffer.getGraphics();
+        main.start();
+    }
+
+    public void startTimer(int countPassed)
+    {
+        ActionListener action = new ActionListener()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                    if(ct == 0)
+                    {                        
+                        ct += 1000;
+                    }
+                    else if(ct % 5 == 0)
+                    {
+                        repaint();
+                    }
+                    ct--;
+                    repaint();
+                }
+            };
+        stopwatch = new Timer(delay,action);
+        stopwatch.setInitialDelay(0);
+        stopwatch.start();
+        ct = countPassed;
+    }
+
+    public void move()
+    {
+        for(int z = bodyParts - 1; z > 0; z--)
+        {
+            if(Math.abs(snake.get(z).getX()-snake.get(z-1).getX()) == 1)
+                snake.get(z).setX(snake.get(z-1).getX());
+            if(snake.get(z-1).getX() < snake.get(z).getX() && !(new BodyPart(new Rectangle(snake.get(z).getX()-5,snake.get(z).getY(),20,20)).collides(blocks)))
+                snake.get(z).changeX((int)((snake.get(z-1).getX()-snake.get(z).getX())/1.5));
+            if(snake.get(z-1).getX() > snake.get(z).getX() && !(new BodyPart(new Rectangle(snake.get(z).getX()+5,snake.get(z).getY(),20,20)).collides(blocks)))
+                snake.get(z).changeX((int)((snake.get(z-1).getX()-snake.get(z).getX())/1.5));
+        }
+    }
+
+    public void run()
+    {
+        while(true)
+        {
+            try{main.sleep(40);} catch(Exception e) {}
+            //repaint();
+
+            startTimer(1000);
+
+            if(alive)
+            {
+                play.setMessage("RESTART");
+                BodyPart head = new BodyPart(new Rectangle(snake.get(0).getX(),snake.get(0).getY(),20,20));
+
+                move();
+
+                if(screen.getScore() > 0 && screen.getScore() % 80 == 0 && speed < 16)
+                    speed += 4;
+
+                for(int n = 0; n < 3; n++)
+                {
+                    if(head.getRect().intersects(additions[n].getRect()))
+                    {
+                        for(int p = 0; p < additions[n].getPoints(); p++)
+                        {
+                            snake.add(new BodyPart(new Rectangle(snake.get(snake.size()-1).getX(),432 + 20*(bodyParts + p),20,20)));
+                        }
+                        bodyParts += additions[n].getPoints();
+                    }
+
+                    if(additions[n].collides(blocks) || additions[n].getY() > 640 || head.getRect().intersects(additions[n].getRect()))
+                    {
+                        additions[n].setRect(new Rectangle((int)(Math.random()*380),(int)(Math.random()*-80 - 280),20,20));
+                        /*additions[n].setX((int)(Math.random()*380));
+                        additions[n].setY((int)(Math.random()*-80 - 280));*/
+                        additions[n].setY(additions[n].getY() - (additions[n].getY() % speed));
+                        additions[n].setPoints((int)(Math.random()*5 + 1));
+                    }
+                }
+
+                if(blocks[0].getY() > 640)
+                {
+                    for(int n = 0; n < 5; n++)
+                    {
+                        blocks[n].setY(-80);
+                        blocks[n].setPoints((int)(Math.random()*(bodyParts+30)));
+                    }
+                    blocks[(int)(Math.random()*blocks.length)].setPoints(((int)(Math.random()*20)));
+                }
+
+                collision = true;
+                for(int n = 0; n < 5; n++)
+                {
+                    if(head.hits(blocks[n]) && blocks[n].getPoints() > 0)
+                    {
+                        collision = true;
+                        blocks[n].decrease();
+                        snake.remove(snake.size()-1);
+                        bodyParts--;
+                        screen.increaseScore();
+                    }
+                    if(blocks[n].getPoints() == 0)
+                        collision = false;
+                }
+
+                if(head.getY() != blocks[0].getY() + 80 || !collision)
+                {
+                    for(int n = 0; n < 5; n++)
+                        blocks[n].changeY(speed);
+                    for(int n = 0; n < 3; n++)
+                        additions[n].changeY(speed);
+                }
+
+                if(bodyParts == 0)
+                    alive = false;
+            }
+        }
+    }
+
+    public void mouseMoved(MouseEvent e)
+    {
+        if(e.getX() < 380 && !new BodyPart(new Rectangle(e.getX(),snake.get(0).getY(),20,20)).collides(blocks) && alive)
+        {
+            mousex = e.getX();
+            snake.get(0).setX(mousex);
+        }
+    }
+
+    public void mousePressed(MouseEvent e){}
+
+    public void mouseReleased(MouseEvent e){}
+
+    public void mouseEntered(MouseEvent e){}
+
+    public void mouseExited(MouseEvent e){}
+
+    public void mouseClicked(MouseEvent e)
+    {
+        mousex = e.getX();
+        int mousey = e.getY();
+        if(!alive)
+        {
+            mousex = e.getX();
+            mousey = e.getY();
+            if(new Rectangle(mousex,mousey,1,1).intersects(play.getRect()))
+            {
+                alive = true;
+            }
+            if(play.getMessage().equals("RESTART") && new Rectangle(mousex,mousey,1,1).intersects(play.getRect()))
+            {
+                init();
+                alive = true;
+            }
+        }
+
+        if(!rulesSheet)
+        {
+            if(new Rectangle(mousex,mousey,1,1).intersects(rules.getRect()))
+                rulesSheet = true;
+        }
+
+        if(new Rectangle(mousex,mousey,1,1).intersects(back.getRect()) && rulesSheet)
+            rulesSheet = false;
+    }
+
+    public void mouseDragged(MouseEvent e){}
+
+    public void paint(Graphics g)
+    {
+        screen.drawScreen(bufferg);
+        bufferg.setColor(Color.red);
+        bufferg.setFont(blockValues);
+        bufferg.drawString("Parts: " + bodyParts,450,360);
+        bufferg.drawString("speed: " + speed, 450,480);
+        for(int n = 0; n < 3; n++)
+        {
+            //additions[n].draw(bufferg);
+            bufferg.setColor(Color.yellow);
+            bufferg.setFont(new Font("bold",1,25));
+            bufferg.fillOval(additions[n].getX(),additions[n].getY(),20,20);
+            bufferg.setColor(Color.white);
+            bufferg.drawString(additions[n].getPoints() + "", additions[n].getX(),additions[n].getY() - 20);
+        }
+
+        for(int n = 0; n < snake.size(); n++)
+        {
+            //snake.get(n).draw(bufferg);
+            bufferg.setColor(Color.yellow);
+            bufferg.fillOval(snake.get(n).getX(),snake.get(n).getY(),20,20);
+            bufferg.setColor(Color.black);
+            bufferg.drawOval(snake.get(n).getX(),snake.get(n).getY(),20,20);
+        }
+
+        Color[] colors = new Color[] {Color.cyan,Color.green,Color.yellow,Color.orange,Color.red,Color.magenta};
+        for(int p = 0; p < 5; p++)
+        {
+            //blocks[p].draw(bufferg,blockValues);
+            int c = 0;
+            c += (int)(blocks[p].getPoints() / 10);
+            bufferg.setColor(colors[c]);
+            if(blocks[p].getPoints() > 0)
+            {
+                bufferg.fillRect(blocks[p].getX(),blocks[p].getY(),80,80);
+                bufferg.setColor(Color.black);
+                bufferg.drawRect(blocks[p].getX(),blocks[p].getY(),80,80);
+                blocks[p].drawCenteredString(bufferg,blocks[p].getPoints() + "", blocks[p].getRect(),blockValues);
+            }
+        }
+
+        //rules.draw(bufferg,Color.darkGray,Color.white,new Font("bold",1,30));
+        bufferg.setColor(Color.darkGray);
+        bufferg.fillRect(rules.getX(),rules.getY(),200,60);
+        bufferg.setColor(Color.black);
+        bufferg.drawRect(rules.getX(),rules.getY(),200,60);
+        bufferg.setColor(Color.white);
+        play.drawCenteredString(bufferg,rules.getMessage(),rules.getRect(),buttonFont);
+        if(!alive)
+        {
+            //play.draw(bufferg,Color.lightGray,Color.red,new Font("bold",1,30));
+            bufferg.setColor(Color.lightGray);
+            bufferg.fillRect(play.getX(),play.getY(),160,80);
+            bufferg.setColor(Color.black);
+            bufferg.drawRect(play.getX(),play.getY(),160,80);
+            bufferg.setColor(Color.red);
+            play.drawCenteredString(bufferg,play.getMessage(),play.getRect(),buttonFont);
+        }
+        if(rulesSheet)
+        {
+            screen.drawRules(bufferg);
+            //back.draw(bufferg,Color.darkGray,Color.white,new Font("bold",1,30));
+            bufferg.setColor(Color.darkGray);
+            bufferg.fillRect(back.getX(),back.getY(),100,60);
+            bufferg.setColor(Color.black);
+            bufferg.drawRect(back.getX(),back.getY(),100,60);
+            bufferg.setColor(Color.white);
+            play.drawCenteredString(bufferg,back.getMessage(),back.getRect(),buttonFont);
+        }
+        g.drawImage(buffer,0,0,this);
+    }
+
+    public void update(Graphics g)
+    {
+        paint(g);
+    }
+}
