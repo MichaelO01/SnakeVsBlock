@@ -26,11 +26,41 @@ public class Addition
         return "Points: " + getPoints() + "Position: (" + rect.x + "," + rect.y + ")";
     }
 
+    public void setRect(Rectangle inR)
+    {
+        rect = inR;
+    }
+
     public Rectangle getRect()
     {
         return rect;
     }
-    
+
+    public void setX(int inX)
+    {
+        rect = new Rectangle(inX,rect.y,rect.width,rect.height);
+    }
+
+    public int getX()
+    {
+        return rect.x;
+    }
+
+    public void setY(int inY)
+    {
+        rect = new Rectangle(rect.x,inY,rect.width,rect.height);
+    }
+
+    public int getY()
+    {
+        return rect.y;
+    }
+
+    public void changeY(int n)
+    {
+        setY(rect.y + n);
+    }
+
     public boolean collides(Block [] b)
     {
         boolean hit = false;
