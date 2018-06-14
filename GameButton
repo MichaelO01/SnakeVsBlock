@@ -4,33 +4,53 @@ public class GameButton
 {
     private Rectangle rect;
     private String message;
-    
+
     public GameButton(Rectangle inRect, String inMsg)
     {
         rect = inRect;
         setMessage(inMsg);
     }
-    
+
     public String toString()
     {
         return message + " Button, (" + rect.x + "," + rect.y + ")";
     }
-    
+
     public void setMessage(String inM)
     {
         message = inM;
     }
-    
+
     public String getMessage()
     {
         return message;
     }
-    
+
     public Rectangle getRect()
     {
         return rect;
     }
-    
+
+    public void setX(int inX)
+    {
+        rect = new Rectangle(inX,rect.y,rect.width,rect.height);
+    }
+
+    public int getX()
+    {
+        return rect.x;
+    }
+
+    public void setY(int inY)
+    {
+        rect = new Rectangle(rect.x,inY,rect.width,rect.height);
+    }
+
+    public int getY()
+    {
+        return rect.y;
+    }
+
     public void drawCenteredString(Graphics g, String text, Rectangle r, Font font)
     {
         FontMetrics metrics = g.getFontMetrics(font);
@@ -39,7 +59,7 @@ public class GameButton
         g.setFont(font);
         g.drawString(text, x, y);
     }
-    
+
     public void draw(Graphics g, Color button, Color text, Font f)
     {
         g.setColor(button);
